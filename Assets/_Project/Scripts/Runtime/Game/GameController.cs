@@ -2,6 +2,7 @@ using UnityEngine;
 using WheelOfFortune.Core;
 using WheelOfFortune.Data;
 using WheelOfFortune.Gameplay;
+using WheelOfFortune.UI.Rewards;
 using WheelOfFortune.UI.Wheel;
 
 namespace WheelOfFortune.Game
@@ -14,6 +15,7 @@ namespace WheelOfFortune.Game
     {
         [SerializeField] private ZoneConfig _zoneConfig;
         [SerializeField] private WheelView _wheelView;
+        [SerializeField] private RewardPanelView _rewardPanelView;
 
         private ZoneProgression _progression;
         private GameSession _session;
@@ -28,6 +30,7 @@ namespace WheelOfFortune.Game
         private void OnEnable()
         {
             _wheelView.SpinClicked += HandleSpinClicked;
+            _rewardPanelView.ExitClicked += HandleExitClicked;
             _session.ZoneChanged += HandleZoneChanged;
             _session.StateChanged += HandleStateChanged;
         }
@@ -35,12 +38,14 @@ namespace WheelOfFortune.Game
         private void OnDisable()
         {
             _wheelView.SpinClicked -= HandleSpinClicked;
+            _rewardPanelView.ExitClicked -= HandleExitClicked;
             _session.ZoneChanged -= HandleZoneChanged;
             _session.StateChanged -= HandleStateChanged;
         }
 
         private void Start()
         {
+            _rewardPanelView.Bind(_session.Inventory);
             ShowZone(_session.CurrentZone);
             HandleStateChanged(_session.State);
         }
@@ -53,16 +58,23 @@ namespace WheelOfFortune.Game
             _wheelView.PlaySpin(outcome.SliceIndex, _session.CompleteSpin);
         }
 
+        private void HandleExitClicked()
+        {
+            if (!_session.CanLeave) return;
+            _session.Leave();
+        }
+
         private void HandleZoneChanged(int zone) => ShowZone(zone);
 
         private void HandleStateChanged(SessionState state)
         {
             _wheelView.SetSpinInteractable(state == SessionState.ReadyToSpin);
+            _rewardPanelView.SetExitInteractable(_session.CanLeave);
 
-            // Temporary until the bomb popup exists: log and start over.
-            if (state == SessionState.Busted)
+            // Temporary until the bomb and collect popups exist: log and start over.
+            if (state == SessionState.Busted || state == SessionState.Collected)
             {
-                Debug.Log($"Bomb at zone {_session.CurrentZone}. Restarting.");
+                Debug.Log($"{state} at zone {_session.CurrentZone}. Restarting.");
                 _session.Restart();
             }
         }
