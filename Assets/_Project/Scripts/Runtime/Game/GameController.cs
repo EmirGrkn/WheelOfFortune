@@ -2,6 +2,7 @@ using UnityEngine;
 using WheelOfFortune.Core;
 using WheelOfFortune.Data;
 using WheelOfFortune.Gameplay;
+using WheelOfFortune.UI.Popups;
 using WheelOfFortune.UI.Rewards;
 using WheelOfFortune.UI.Wheel;
 using WheelOfFortune.UI.Zone;
@@ -20,6 +21,8 @@ namespace WheelOfFortune.Game
         [SerializeField] private ZoneBarView _zoneBarView;
         [SerializeField] private NextZoneCardView _safeZoneCard;
         [SerializeField] private NextZoneCardView _superZoneCard;
+        [SerializeField] private BustedPopupView _bustedPopup;
+        [SerializeField] private CollectedPopupView _collectedPopup;
 
         private ZoneProgression _progression;
         private GameSession _session;
@@ -35,6 +38,8 @@ namespace WheelOfFortune.Game
         {
             _wheelView.SpinClicked += HandleSpinClicked;
             _rewardPanelView.ExitClicked += HandleExitClicked;
+            _bustedPopup.GiveUpClicked += HandleGiveUpClicked;
+            _collectedPopup.ContinueClicked += HandleContinueClicked;
             _session.ZoneChanged += HandleZoneChanged;
             _session.StateChanged += HandleStateChanged;
         }
@@ -43,6 +48,8 @@ namespace WheelOfFortune.Game
         {
             _wheelView.SpinClicked -= HandleSpinClicked;
             _rewardPanelView.ExitClicked -= HandleExitClicked;
+            _bustedPopup.GiveUpClicked -= HandleGiveUpClicked;
+            _collectedPopup.ContinueClicked -= HandleContinueClicked;
             _session.ZoneChanged -= HandleZoneChanged;
             _session.StateChanged -= HandleStateChanged;
         }
@@ -69,6 +76,10 @@ namespace WheelOfFortune.Game
             _session.Leave();
         }
 
+        private void HandleGiveUpClicked() => _bustedPopup.Hide(_session.Restart);
+
+        private void HandleContinueClicked() => _collectedPopup.Hide(_session.Restart);
+
         private void HandleZoneChanged(int zone)
         {
             ShowZone(zone);
@@ -80,11 +91,16 @@ namespace WheelOfFortune.Game
             _wheelView.SetSpinInteractable(state == SessionState.ReadyToSpin);
             _rewardPanelView.SetExitInteractable(_session.CanLeave);
 
-            // Temporary until the bomb and collect popups exist: log and start over.
-            if (state == SessionState.Busted || state == SessionState.Collected)
+            switch (state)
             {
-                Debug.Log($"{state} at zone {_session.CurrentZone}. Restarting.");
-                _session.Restart();
+                case SessionState.Busted:
+                    _bustedPopup.Show();
+                    break;
+                case SessionState.Collected:
+                    // Show first so the popup is active and its layout can be built while filling it.
+                    _collectedPopup.Show();
+                    _collectedPopup.SetRewards(_session.Inventory);
+                    break;
             }
         }
 
