@@ -6,7 +6,11 @@ rewards grow every zone, the bomb takes everything collected so far.
 
 - **Unity** 6000.3.23f1 (URP, uGUI, TextMeshPro, DOTween, Sprite Atlas V2)
 - **Platform** Android, IL2CPP, ARM64, landscape
-- **APK** see the [latest release](../../releases/latest)
+- **APK and gameplay video** see the [latest release](../../releases/latest)
+
+| 20:9 | 16:9 | 4:3 |
+|---|---|---|
+| ![20:9](Docs/Screenshots/screenshot_20x9.png) | ![16:9](Docs/Screenshots/screenshot_16x9.png) | ![4:3](Docs/Screenshots/screenshot_4x3.png) |
 
 ## Rules
 
