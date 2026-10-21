@@ -4,6 +4,7 @@ using WheelOfFortune.Data;
 using WheelOfFortune.Gameplay;
 using WheelOfFortune.UI.Rewards;
 using WheelOfFortune.UI.Wheel;
+using WheelOfFortune.UI.Zone;
 
 namespace WheelOfFortune.Game
 {
@@ -16,6 +17,7 @@ namespace WheelOfFortune.Game
         [SerializeField] private ZoneConfig _zoneConfig;
         [SerializeField] private WheelView _wheelView;
         [SerializeField] private RewardPanelView _rewardPanelView;
+        [SerializeField] private ZoneBarView _zoneBarView;
 
         private ZoneProgression _progression;
         private GameSession _session;
@@ -46,6 +48,7 @@ namespace WheelOfFortune.Game
         private void Start()
         {
             _rewardPanelView.Bind(_session.Inventory);
+            _zoneBarView.Initialize(_progression.GetZoneType, _session.CurrentZone);
             ShowZone(_session.CurrentZone);
             HandleStateChanged(_session.State);
         }
@@ -64,7 +67,11 @@ namespace WheelOfFortune.Game
             _session.Leave();
         }
 
-        private void HandleZoneChanged(int zone) => ShowZone(zone);
+        private void HandleZoneChanged(int zone)
+        {
+            ShowZone(zone);
+            _zoneBarView.SetZone(zone);
+        }
 
         private void HandleStateChanged(SessionState state)
         {
