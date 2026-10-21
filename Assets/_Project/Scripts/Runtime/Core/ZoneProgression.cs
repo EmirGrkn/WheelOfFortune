@@ -34,10 +34,20 @@ namespace WheelOfFortune.Core
 
         public bool IsRiskFree(int zone) => GetZoneType(zone) != ZoneType.Normal;
 
+        /// <summary>
+        /// First zone after <paramref name="zone"/> whose type is <paramref name="type"/>.
+        /// A multiple of the safe interval that is also a super zone does not count as safe.
+        /// </summary>
         public int GetNextZone(int zone, ZoneType type)
         {
-            int interval = type == ZoneType.Super ? _superZoneInterval : _safeZoneInterval;
-            return (zone / interval + 1) * interval;
+            // Zone types repeat every safe * super zones, so searching further cannot find anything new.
+            int searchLimit = zone + _safeZoneInterval * _superZoneInterval;
+            for (int next = zone + 1; next <= searchLimit; next++)
+            {
+                if (GetZoneType(next) == type) return next;
+            }
+
+            throw new InvalidOperationException($"No {type} zone exists after zone {zone} with the current intervals.");
         }
 
         public int ScaleRewardAmount(int baseAmount, int zone)

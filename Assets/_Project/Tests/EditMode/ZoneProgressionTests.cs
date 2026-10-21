@@ -35,11 +35,21 @@ namespace WheelOfFortune.Tests
         [TestCase(1, ZoneType.Safe, 5)]
         [TestCase(5, ZoneType.Safe, 10)]
         [TestCase(11, ZoneType.Safe, 15)]
+        [TestCase(26, ZoneType.Safe, 35)]
+        [TestCase(25, ZoneType.Safe, 35)]
         [TestCase(1, ZoneType.Super, 30)]
         [TestCase(30, ZoneType.Super, 60)]
         public void GetNextZone_ReturnsUpcomingZoneOfType(int zone, ZoneType type, int expected)
         {
             Assert.AreEqual(expected, _progression.GetNextZone(zone, type));
+        }
+
+        [Test]
+        public void GetNextZone_WhenTypeCanNeverOccur_Throws()
+        {
+            // Every safe zone would also be a super zone, so no zone is ever of type Safe.
+            var progression = new ZoneProgression(safeZoneInterval: 30, superZoneInterval: 30, rewardGrowthPerZone: 0f);
+            Assert.Throws<System.InvalidOperationException>(() => progression.GetNextZone(1, ZoneType.Safe));
         }
 
         [TestCase(100, 1, 100)]

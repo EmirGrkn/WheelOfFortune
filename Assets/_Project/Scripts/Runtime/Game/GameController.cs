@@ -18,6 +18,8 @@ namespace WheelOfFortune.Game
         [SerializeField] private WheelView _wheelView;
         [SerializeField] private RewardPanelView _rewardPanelView;
         [SerializeField] private ZoneBarView _zoneBarView;
+        [SerializeField] private NextZoneCardView _safeZoneCard;
+        [SerializeField] private NextZoneCardView _superZoneCard;
 
         private ZoneProgression _progression;
         private GameSession _session;
@@ -90,6 +92,8 @@ namespace WheelOfFortune.Game
         {
             _currentWheel = _zoneConfig.GetWheel(_progression.GetZoneType(zone));
             _wheelView.SetWheel(_currentWheel, slice => _progression.ScaleRewardAmount(slice.BaseAmount, zone));
+            _safeZoneCard.SetZone(_progression.GetNextZone(zone, ZoneType.Safe));
+            _superZoneCard.SetZone(_progression.GetNextZone(zone, ZoneType.Super));
         }
     }
 }
