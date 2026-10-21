@@ -15,6 +15,8 @@ namespace WheelOfFortune.Data
         [SerializeField] private Sprite _indicatorSprite;
         [SerializeField] private string _title;
         [SerializeField] private Color _titleColor = Color.white;
+        [SerializeField, Tooltip("Tint of the light rays behind the wheel. Zero alpha hides them.")]
+        private Color _raysColor = Color.clear;
 
         [Header("Slices (clockwise, starting from the top)")]
         [SerializeField] private WheelSliceData[] _slices = new WheelSliceData[SliceCount];
@@ -23,6 +25,7 @@ namespace WheelOfFortune.Data
         public Sprite IndicatorSprite => _indicatorSprite;
         public string Title => _title;
         public Color TitleColor => _titleColor;
+        public Color RaysColor => _raysColor;
         public IReadOnlyList<WheelSliceData> Slices => _slices;
 
         public bool HasBomb => Array.Exists(_slices, slice => slice != null && slice.IsBomb);

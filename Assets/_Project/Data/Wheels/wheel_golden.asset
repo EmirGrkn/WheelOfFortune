@@ -16,6 +16,7 @@ MonoBehaviour:
   _indicatorSprite: {fileID: 21300000, guid: a072b7abd9e617e49b2bc1fe5d8fe707, type: 3}
   _title: GOLDEN SPIN
   _titleColor: {r: 1.0, g: 0.76, b: 0.0, a: 1}
+  _raysColor: {r: 1, g: 0.8, b: 0.2, a: 0.55}
   _slices:
   - _isBomb: 0
     _reward: {fileID: 11400000, guid: 99d53a4a91f74a0dae918409b4e1fcd7, type: 2}

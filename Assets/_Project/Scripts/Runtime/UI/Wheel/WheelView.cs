@@ -42,8 +42,26 @@ namespace WheelOfFortune.UI.Wheel
         private float _tickAngle = 18f;
         [SerializeField, Min(0f)] private float _tickReturnDuration = 0.15f;
 
+        [Header("Effects")]
+        [SerializeField, Tooltip("Light rays behind the wheel. Rotated by an Animator on its own transform.")]
+        private Image _raysImage;
+        [SerializeField, Min(0f)] private float _raysFadeDuration = 0.4f;
+        [SerializeField, Tooltip("Flash on the top socket, where the result always lands.")]
+        private Image _resultShineImage;
+        [SerializeField] private Color _rewardShineColor = Color.white;
+        [SerializeField] private Color _bombShineColor = new Color(1f, 0.25f, 0.2f);
+        [SerializeField, Min(0f)] private float _shineDuration = 0.45f;
+        [SerializeField] private float _wheelChangePunch = 0.08f;
+        [SerializeField, Min(0f)] private float _wheelChangePunchDuration = 0.35f;
+        [SerializeField] private float _spinButtonPulseScale = 1.06f;
+        [SerializeField, Min(0.1f)] private float _spinButtonPulseDuration = 0.6f;
+
         private Tween _spinTween;
         private Tween _tickTween;
+        private Tween _raysTween;
+        private Tween _shineTween;
+        private Tween _pulseTween;
+        private WheelData _shownWheel;
         // Unwrapped wheel angle. localEulerAngles wraps at 360, which would break counting slice borders.
         private float _wheelAngle;
         private int _lastBorderIndex;
@@ -59,6 +77,10 @@ namespace WheelOfFortune.UI.Wheel
             _spinButton.onClick.RemoveListener(HandleSpinClicked);
             _spinTween?.Kill();
             _tickTween?.Kill(complete: true);
+            _raysTween?.Kill(complete: true);
+            _shineTween?.Kill(complete: true);
+            _pulseTween?.Kill();
+            transform.DOKill(complete: true);
         }
 
         public void SetWheel(WheelData wheel, Func<WheelSliceData, int> getAmount)
@@ -67,6 +89,16 @@ namespace WheelOfFortune.UI.Wheel
             _indicatorImage.sprite = wheel.IndicatorSprite;
             _titleText.text = wheel.Title;
             _titleText.color = wheel.TitleColor;
+
+            bool isWheelChange = _shownWheel != null && _shownWheel != wheel;
+            ShowRays(wheel.RaysColor, animate: isWheelChange);
+            if (isWheelChange)
+            {
+                transform.DOKill(complete: true);
+                transform.DOPunchScale(Vector3.one * _wheelChangePunch, _wheelChangePunchDuration, vibrato: 5)
+                    .SetLink(gameObject);
+            }
+            _shownWheel = wheel;
 
             for (int i = 0; i < _slices.Length; i++)
             {
@@ -82,7 +114,36 @@ namespace WheelOfFortune.UI.Wheel
             }
         }
 
-        public void SetSpinInteractable(bool interactable) => _spinButton.interactable = interactable;
+        public void SetSpinInteractable(bool interactable)
+        {
+            _spinButton.interactable = interactable;
+
+            // A gentle pulse invites the player to spin while it is possible.
+            _pulseTween?.Kill();
+            Transform buttonTransform = _spinButton.transform;
+            buttonTransform.localScale = Vector3.one;
+            if (!interactable) return;
+
+            _pulseTween = buttonTransform.DOScale(_spinButtonPulseScale, _spinButtonPulseDuration)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetLink(gameObject);
+        }
+
+        public void PlayResultShine(bool isBomb)
+        {
+            Transform shineTransform = _resultShineImage.transform;
+            _shineTween?.Kill();
+            _resultShineImage.gameObject.SetActive(true);
+            _resultShineImage.color = isBomb ? _bombShineColor : _rewardShineColor;
+            shineTransform.localScale = Vector3.one * 0.3f;
+
+            _shineTween = DOTween.Sequence()
+                .Append(shineTransform.DOScale(1.3f, _shineDuration).SetEase(Ease.OutQuad))
+                .Join(_resultShineImage.DOFade(0f, _shineDuration).SetEase(Ease.InQuad))
+                .SetLink(gameObject)
+                .OnComplete(() => _resultShineImage.gameObject.SetActive(false));
+        }
 
         public Vector3 GetSliceIconPosition(int sliceIndex) => _slices[sliceIndex].IconPosition;
 
@@ -133,6 +194,27 @@ namespace WheelOfFortune.UI.Wheel
             _tickTween = indicator.DOLocalRotate(Vector3.zero, _tickReturnDuration)
                 .SetEase(Ease.OutBack)
                 .SetLink(gameObject);
+        }
+
+        /// <summary>
+        /// Rays are switched off entirely when the wheel has none, which also stops their Animator.
+        /// </summary>
+        private void ShowRays(Color color, bool animate)
+        {
+            _raysTween?.Kill();
+            bool visible = color.a > 0f;
+
+            if (!animate)
+            {
+                _raysImage.color = color;
+                _raysImage.gameObject.SetActive(visible);
+                return;
+            }
+
+            _raysImage.gameObject.SetActive(true);
+            _raysTween = _raysImage.DOColor(color, _raysFadeDuration)
+                .SetLink(gameObject)
+                .OnComplete(() => _raysImage.gameObject.SetActive(visible));
         }
 
         private void HandleSpinClicked() => SpinClicked?.Invoke();

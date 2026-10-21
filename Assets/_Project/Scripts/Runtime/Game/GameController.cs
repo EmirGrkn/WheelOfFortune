@@ -73,6 +73,8 @@ namespace WheelOfFortune.Game
 
         private void HandleSpinFinished(SpinOutcome outcome)
         {
+            _wheelView.PlayResultShine(outcome.IsBomb);
+
             if (outcome.IsBomb)
             {
                 _session.CompleteSpin();
