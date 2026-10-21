@@ -36,6 +36,13 @@ namespace WheelOfFortune.Data
             {
                 Array.Resize(ref _slices, SliceCount);
             }
+
+            for (int i = 0; i < _slices.Length; i++)
+            {
+                WheelSliceData slice = _slices[i];
+                if (slice != null && !slice.IsBomb && slice.Reward == null)
+                    Debug.LogWarning($"{name}: slice {i} is not a bomb but has no reward assigned.", this);
+            }
         }
     }
 }

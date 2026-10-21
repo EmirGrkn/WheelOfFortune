@@ -64,7 +64,20 @@ namespace WheelOfFortune.UI.Rewards
                 ScrollToBottom();
             }
 
-            return row.IconPosition;
+            return ClampToViewport(row.IconPosition);
+        }
+
+        /// <summary>
+        /// An existing row can be scrolled out of view; its icons then land on the nearest visible edge of the list
+        /// instead of flying outside the panel.
+        /// </summary>
+        private Vector3 ClampToViewport(Vector3 worldPosition)
+        {
+            RectTransform viewport = _scrollRect.viewport != null ? _scrollRect.viewport : (RectTransform)_scrollRect.transform;
+            Rect bounds = viewport.rect;
+            Vector3 local = viewport.InverseTransformPoint(worldPosition);
+            local.y = Mathf.Clamp(local.y, bounds.yMin, bounds.yMax);
+            return viewport.TransformPoint(local);
         }
 
         private void Unbind()

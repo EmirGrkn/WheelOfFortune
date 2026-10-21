@@ -29,6 +29,8 @@ namespace WheelOfFortune.Data
 
         private void OnValidate()
         {
+            if (_normalWheel == null || _safeWheel == null || _superWheel == null)
+                Debug.LogWarning($"{name}: every zone type needs a wheel assigned.", this);
             if (_safeWheel != null && _safeWheel.HasBomb)
                 Debug.LogWarning($"{name}: safe wheel '{_safeWheel.name}' contains a bomb, but safe zones must be risk-free.", this);
             if (_superWheel != null && _superWheel.HasBomb)
