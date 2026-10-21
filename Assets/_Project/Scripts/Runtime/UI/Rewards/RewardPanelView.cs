@@ -50,6 +50,23 @@ namespace WheelOfFortune.UI.Rewards
 
         public void SetExitInteractable(bool interactable) => _exitButton.interactable = interactable;
 
+        /// <summary>
+        /// World position a reward of this item should fly to. For a new item an empty row is reserved first,
+        /// so the icons land exactly where the row will appear once the reward is added.
+        /// </summary>
+        public Vector3 GetFlyTarget(RewardItemData item)
+        {
+            if (!_activeRows.TryGetValue(item, out RewardRowView row))
+            {
+                row = GetRow();
+                row.ShowPending(item.Icon);
+                _activeRows.Add(item, row);
+                ScrollToBottom();
+            }
+
+            return row.IconPosition;
+        }
+
         private void Unbind()
         {
             if (_inventory == null) return;

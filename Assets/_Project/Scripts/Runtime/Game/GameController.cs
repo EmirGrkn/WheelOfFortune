@@ -18,6 +18,7 @@ namespace WheelOfFortune.Game
         [SerializeField] private ZoneConfig _zoneConfig;
         [SerializeField] private WheelView _wheelView;
         [SerializeField] private RewardPanelView _rewardPanelView;
+        [SerializeField] private RewardFlyView _rewardFlyView;
         [SerializeField] private ZoneBarView _zoneBarView;
         [SerializeField] private NextZoneCardView _safeZoneCard;
         [SerializeField] private NextZoneCardView _superZoneCard;
@@ -67,7 +68,21 @@ namespace WheelOfFortune.Game
             if (!_session.CanSpin) return;
 
             SpinOutcome outcome = _session.Spin(_currentWheel.Slices);
-            _wheelView.PlaySpin(outcome.SliceIndex, _session.CompleteSpin);
+            _wheelView.PlaySpin(outcome.SliceIndex, () => HandleSpinFinished(outcome));
+        }
+
+        private void HandleSpinFinished(SpinOutcome outcome)
+        {
+            if (outcome.IsBomb)
+            {
+                _session.CompleteSpin();
+                return;
+            }
+
+            // The reward is added only after it has visibly reached the panel.
+            Vector3 from = _wheelView.GetSliceIconPosition(outcome.SliceIndex);
+            Vector3 to = _rewardPanelView.GetFlyTarget(outcome.Reward);
+            _rewardFlyView.Play(outcome.Reward.Icon, from, to, _session.CompleteSpin);
         }
 
         private void HandleExitClicked()

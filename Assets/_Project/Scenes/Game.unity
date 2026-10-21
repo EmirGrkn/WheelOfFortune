@@ -1247,6 +1247,8 @@ MonoBehaviour:
   _spinDuration: 3.5
   _spinEase: 12
   _landingJitter: 12
+  _tickAngle: 18
+  _tickReturnDuration: 0.15
 --- !u!1 &659426618
 GameObject:
   m_ObjectHideFlags: 0
@@ -1913,6 +1915,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 331341821}
+  - {fileID: 1532574479}
   - {fileID: 3751807316371604254}
   - {fileID: 618404699206620993}
   m_Father: {fileID: 0}
@@ -2031,8 +2034,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 222}
-  m_SizeDelta: {x: 41, y: 56}
+  m_AnchoredPosition: {x: 0, y: 195}
+  m_SizeDelta: {x: 60, y: 80}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &953865742
 MonoBehaviour:
@@ -2056,7 +2059,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: ec6b36d8d487a824984d238535dee874, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3137,6 +3140,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faf49c99b0ac40344ba688e8179e7a54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: WheelOfFortune.Runtime::WheelOfFortune.UI.Wheel.WheelSliceView
+--- !u!1 &1532574478
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1532574479}
+  - component: {fileID: 1532574480}
+  m_Layer: 5
+  m_Name: ui_layer_reward_fly
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1532574479
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532574478}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 809927315}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1532574480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532574478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7be93ce0d649be41a1a565679521771, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: WheelOfFortune.Runtime::WheelOfFortune.UI.Rewards.RewardFlyView
+  _iconPrefab: {fileID: 5255597198719383022, guid: 26502551ce22e4445a0a1cb53602be59, type: 3}
+  _iconCount: 5
+  _burstRadius: 50
+  _burstDuration: 0.2
+  _stagger: 0.06
+  _flyDuration: 0.5
+  _jumpPower: 120
+  _arrivalScale: 0.6
 --- !u!1 &1617717213
 GameObject:
   m_ObjectHideFlags: 0
@@ -3482,6 +3541,7 @@ MonoBehaviour:
   _zoneConfig: {fileID: 11400000, guid: 705a4933042d4bf6ba2f5b275d898dee, type: 2}
   _wheelView: {fileID: 622833414}
   _rewardPanelView: {fileID: 697000303}
+  _rewardFlyView: {fileID: 1532574480}
   _zoneBarView: {fileID: 1630095421}
   _safeZoneCard: {fileID: 352447605}
   _superZoneCard: {fileID: 698943851}

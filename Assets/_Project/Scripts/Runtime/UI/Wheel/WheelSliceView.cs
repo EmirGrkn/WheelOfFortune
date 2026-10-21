@@ -13,6 +13,8 @@ namespace WheelOfFortune.UI.Wheel
         [SerializeField] private Image _iconImage;
         [SerializeField] private TMP_Text _amountText;
 
+        public Vector3 IconPosition => _iconImage.rectTransform.position;
+
         /// <param name="iconScale">Uniform scale for icons whose sprite has a lot of transparent padding.</param>
         public void Show(Sprite icon, string amountText, float iconScale = 1f)
         {

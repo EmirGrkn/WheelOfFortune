@@ -37,9 +37,20 @@ namespace WheelOfFortune.UI.Wheel
         [SerializeField, Range(0f, 20f), Tooltip("Random offset so the wheel does not always stop at the exact slice center.")]
         private float _landingJitter = 12f;
 
+        [Header("Indicator Tick")]
+        [SerializeField, Range(0f, 45f), Tooltip("How far the indicator swings when a slice border passes under it.")]
+        private float _tickAngle = 18f;
+        [SerializeField, Min(0f)] private float _tickReturnDuration = 0.15f;
+
         private Tween _spinTween;
+        private Tween _tickTween;
+        // Unwrapped wheel angle. localEulerAngles wraps at 360, which would break counting slice borders.
+        private float _wheelAngle;
+        private int _lastBorderIndex;
 
         public event Action SpinClicked;
+
+        private void Awake() => _wheelAngle = _rotatingRoot.localEulerAngles.z;
 
         private void OnEnable() => _spinButton.onClick.AddListener(HandleSpinClicked);
 
@@ -47,6 +58,7 @@ namespace WheelOfFortune.UI.Wheel
         {
             _spinButton.onClick.RemoveListener(HandleSpinClicked);
             _spinTween?.Kill();
+            _tickTween?.Kill(complete: true);
         }
 
         public void SetWheel(WheelData wheel, Func<WheelSliceData, int> getAmount)
@@ -72,19 +84,55 @@ namespace WheelOfFortune.UI.Wheel
 
         public void SetSpinInteractable(bool interactable) => _spinButton.interactable = interactable;
 
+        public Vector3 GetSliceIconPosition(int sliceIndex) => _slices[sliceIndex].IconPosition;
+
         public void PlaySpin(int sliceIndex, Action onComplete)
         {
-            // Slice i sits at -i * SliceAngle, so rotating the root by +i * SliceAngle brings it under the indicator.
-            // Subtracting full turns makes the wheel spin clockwise.
+            // Slice i sits at -i * SliceAngle, so a wheel angle of i * SliceAngle brings it under the indicator.
+            // The wheel turns clockwise (decreasing angle): first to the landing angle, then the extra full turns.
             float jitter = UnityEngine.Random.Range(-_landingJitter, _landingJitter);
-            float targetAngle = sliceIndex * SliceAngle + jitter - 360f * _fullTurns;
+            float landingAngle = sliceIndex * SliceAngle + jitter;
+            float toLanding = Mathf.Repeat(_wheelAngle - landingAngle, 360f);
+            float targetAngle = _wheelAngle - toLanding - 360f * _fullTurns;
+            _lastBorderIndex = GetBorderIndex(_wheelAngle);
 
             _spinTween?.Kill();
-            _spinTween = _rotatingRoot
-                .DOLocalRotate(new Vector3(0f, 0f, targetAngle), _spinDuration, RotateMode.FastBeyond360)
+            _spinTween = DOTween.To(() => _wheelAngle, SetWheelAngle, targetAngle, _spinDuration)
                 .SetEase(_spinEase)
                 .SetLink(gameObject)
-                .OnComplete(() => onComplete?.Invoke());
+                .OnComplete(() =>
+                {
+                    // Keep the stored angle small; the visible rotation is the same.
+                    _wheelAngle = Mathf.Repeat(_wheelAngle, 360f);
+                    onComplete?.Invoke();
+                });
+        }
+
+        private void SetWheelAngle(float angle)
+        {
+            _wheelAngle = angle;
+            _rotatingRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
+
+            int borderIndex = GetBorderIndex(angle);
+            if (borderIndex == _lastBorderIndex) return;
+
+            _lastBorderIndex = borderIndex;
+            PlayIndicatorTick();
+        }
+
+        /// <summary>Counts slice borders, which sit half a slice away from slice centers.</summary>
+        private static int GetBorderIndex(float angle) => Mathf.FloorToInt((angle + SliceAngle * 0.5f) / SliceAngle);
+
+        private void PlayIndicatorTick()
+        {
+            // The indicator pivots at its top, so a positive angle swings its tip to the right,
+            // the direction the wheel rim moves at the top while spinning clockwise.
+            RectTransform indicator = _indicatorImage.rectTransform;
+            _tickTween?.Kill();
+            indicator.localRotation = Quaternion.Euler(0f, 0f, _tickAngle);
+            _tickTween = indicator.DOLocalRotate(Vector3.zero, _tickReturnDuration)
+                .SetEase(Ease.OutBack)
+                .SetLink(gameObject);
         }
 
         private void HandleSpinClicked() => SpinClicked?.Invoke();
